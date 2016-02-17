@@ -29,5 +29,6 @@ def abc(request):
 
 urlpatterns = [
     url(r'^$', abc),
-    url(r'map', views.main_page),
+    url(r'map', views.main_page, name='main_page'),
+    url(r'googlemaps', views.maps),
 ]

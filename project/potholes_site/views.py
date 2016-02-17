@@ -14,3 +14,6 @@ class SearchForm(ModelForm):
 def main_page(request):
     c = {'model':SearchForm()}
     return render(request, "potholes_site/map.html",c)
+
+def maps(request):
+    return render(request, "potholes_site/googlemaps.html", {})
