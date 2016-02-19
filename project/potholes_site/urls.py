@@ -15,20 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+
 from django.http import HttpResponse
 from . import views
 
-def abc(request):
-    path = request.path
-    name = request.GET.get('name', '(no name)')
-
-    return HttpResponse('''
-        <h1>Title</h1>
-        <p>Welcome! You came to {}. Your name is {}</p>
-        '''.format(path,name))
-
 urlpatterns = [
-    url(r'^$', abc),
-    url(r'map', views.main_page, name='main_page'),
-    url(r'googlemaps', views.maps),
+    url(r'^$', views.main_page, name='main'),
+    url(r'^stats$', views.stats, name='stats')
 ]

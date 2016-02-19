@@ -1,0 +1,17 @@
+{% extends 'potholes_site/base.html' %}
+
+{% block body %}
+
+    <p><a href="{% url 'main' %}">Back to main</a></p>
+
+    <h3>Compare Neighborhood Statistics</h3>
+    <table>
+        <tr>
+            <th scope="col"><!--empty--></th>
+            <th scope="col"><!--empty--></th>
+            <th scope="col">Average reports per month ||</th>
+            <th scope="col">Average response time</th></tr>
+        <tr>{{ model }}</tr>
+    </table>
+
+{% endblock %}
