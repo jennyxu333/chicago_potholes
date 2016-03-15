@@ -1,0 +1,109 @@
+{% extends 'potholes_site/base.html' %}
+{% block body %}
+    <p><a href="{% url 'home' %}">Back to main</a></p>
+    <h2>Chicago Pothole Repair Tracker</h2>
+    <table>
+      <tr>
+        <td>
+          <h3>Filter Search:</h3>
+          <form method="POST">
+            {% csrf_token %}
+            <table>{{ model }}</table>
+             <input type="submit" name="search_query" value="Animate!" />
+            </form>
+          </td>
+          <td>
+            <div id="map" style="background-color:white; width:500; height:500"></div>
+          </td>
+        </tr>
+      </table>
+    <!-- Heavily modified from Google's API examples -->
+    <!--  https://developers.google.com/maps/documentation/javascript/examples/marker-animations-iteration  -->
+<script>
+//Initializes map
+function initMap() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 14,
+    center: {lat: 41.786, lng: -87.596}
+  });
+}
+</script>
+
+<script>
+               
+  var neighborhoods = [];
+  //Makes a dictionary of potholes
+  {% for pothole in ph %}
+    var dict = {lat: {{pothole.lat}}, lng: {{pothole.lon}}, day: {{pothole.day}}, close: {{pothole.close}}};
+    neighborhoods.push(dict);
+  {% endfor %}
+
+
+  var markers = [];
+  var map;
+
+  //Initializes new map
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 13,
+      center: {lat: neighborhoods[neighborhoods.length -1].lat, lng: neighborhoods[neighborhoods.length -1].lng}
+    });
+    drop();
+  }
+  //Drops the potholes on the map at a certain time
+  function drop() {
+    clearMarkers();
+    for (var i = 0; i < neighborhoods.length; i++) {
+      addMarkerWithTimeout(neighborhoods[i],neighborhoods[i].day * 1000);
+      window.setTimeout( function(){ markers[i].setMap(null)},      neighborhoods[i].close * 1000);
+    }
+  }
+  //Adds and removes markers at certain time
+  function addMarkerWithTimeout(position, timeout) {
+    window.setTimeout(function() {
+    var marker =new google.maps.Marker({
+        position: {lat:position.lat, lng:position.lng},
+        map: map,
+        day: position.day,
+        close: position.close,
+        id : position.id,
+        icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 5,
+        strokeWeight: 1,
+        {% if pothole.status != "Completed" or pothole.status != "Completed - Dup" %}
+        fillOpacity: 1,
+        fillColor: 'blue'
+        {% endif %}
+      }
+      });
+      markers.push(marker);
+    setTimeout(function () {
+          marker.setMap(null);
+      },marker.close*200);  
+    }, timeout);
+  }
+
+  //Clears all the markers      
+  function clearMarkers() {
+    for (var i = 0; i < markers.length; i++) {
+      markers[i].setMap(null);
+    }
+    markers = [];
+  }
+
+</script>
+<script> async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDaUF0YZWhLZqdIljnSFK4R78XbKAoXJ2U&callback=initMap">
+</script>
+
+
+<p><a href="{% url 'stats' %}">Compare across Chicago neighborhoods</a></p>
+<div id="map" style="background-color:white"></div> 
+
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDaUF0YZWhLZqdIljnSFK4R78XbKAoXJ2U&callback=initMap">
+</script>
+
+
+{% endblock %}

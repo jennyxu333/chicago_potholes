@@ -2,16 +2,30 @@
 
 {% block body %}
 
-    <p><a href="{% url 'main' %}">Back to main</a></p>
+    <p><a href="{% url 'home' %}">Back to main</a></p>
 
     <h3>Compare Neighborhood Statistics</h3>
+    <!-- Form to request information about the wards -->
+    <form method="post">
+      {% csrf_token %}
+      <table>{{ model }}</table>
+      <input type="submit" name="inputs" value="search" />
+    </form>
+
+    <!-- Table disaplying the results -->
     <table>
-        <tr>
-            <th scope="col"><!--empty--></th>
-            <th scope="col"><!--empty--></th>
-            <th scope="col">Average reports per month ||</th>
-            <th scope="col">Average response time</th></tr>
-        <tr>{{ model }}</tr>
+        <tr>  
+        {% for ward in wards %}
+          <td>
+              <h3>Ward {{ward.ward}}</h3>
+              <p>Current number of potholes: {{ward.open_potholes}}</p>
+              <p>Average response time: {{ward.average}} days</p>
+              <p>Median response time: {{ward.median}} days</p>
+              <p>Longest response time: {{ward.max_time}} days</p>
+              <p>Traffic in ward: {{ward.traffic_in_ward}} vehicles<br> (since Jan 1, 2016)</p>
+          </td>
+        {% endfor %}
+          </tr>
     </table>
 
 {% endblock %}

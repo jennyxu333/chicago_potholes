@@ -1,36 +1,51 @@
 from django.db import models
 from django.forms import ModelForm
+from django import forms
 
-class Status(models.Model):
-    name = models.CharField(max_length = 10)
+STATUS_CHOICES = (
+            ('Open', 'Not repaired'), 
+            ('Completed','Repaired'))
 
-class Ward(models.Model):
-    name = models.IntegerField()
+URGENCY_CHOICES = (
+            ('Very Low','Very Low'),
+            ('Low','Low'),
+            ('Medium','Medium'),
+            ('High','High'),
+            ('Very High','Very High'))
 
-class Urgency(models.Model):
-    name = models.CharField(max_length = 10)
 
 class Search(models.Model):
-    status = models.ForeignKey('Status')
-    #start_year = models.IntegerField(max_length = 4)
-    #start_month = models.IntegerField(max_length = 2)
-    #start_day = 
-    start_date = models.DateField(default='MM/DD/YYYY')
-    end_date = models.DateField(default='MM/DD/YYYY')
+    '''
+    Creates the fields that the user is able to filter their search by in the
+    main page.
+    '''
+    status = models.CharField(max_length=10,choices=STATUS_CHOICES)
+    start_date = models.DateField(default='YYYY-MM-DD')
+    end_date = models.DateField(default='YYYY-MM-DD')
     zip_code = models.IntegerField(default=60637)
-    urgency = models.ForeignKey('Urgency', null=True)
+    urgency = models.CharField(max_length=10,choices=URGENCY_CHOICES)
 
-class Neighborhood1(models.Model):
-    name = models.CharField(max_length = 20)
-    # default is geo location 
 
-class Neighborhood2(models.Model):
-    name = models.CharField(max_length = 20)
+class Animate(models.Model):
+    '''
+    Creates the fields that the user is able to filter their search by in the
+    animation page.
+    '''
+    start_date = models.DateField(default='2016-01-01')
+    end_date = models.DateField(default='2016-03-08')
+    zip_code = models.IntegerField(default=60637)
+    urgency = models.CharField(max_length=10,choices=URGENCY_CHOICES)
 
-class Neighborhood3(models.Model):
-    name = models.CharField(max_length = 20)
 
 class Stat(models.Model):
-    Neighborhood_1 = models.ForeignKey('Neighborhood1')
-    Neighborhood_2 = models.ForeignKey('Neighborhood2')
-    Neighborhood_3 = models.ForeignKey('Neighborhood3')
+    '''
+    Creates three empty input fields for the user to enter three wards for 
+    comparison.
+    '''
+    Ward_1 = models.CharField(max_length=2)
+    Ward_2 = models.CharField(max_length=2)
+    Ward_3 = models.CharField(max_length=2)
+
+
+class Email(models.Model):
+    ward = models.IntegerField()

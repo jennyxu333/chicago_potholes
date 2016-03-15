@@ -20,6 +20,7 @@ from django.http import HttpResponse
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.main_page, name='main'),
-    url(r'^stats$', views.stats, name='stats')
+    url(r'^animate$', views.animation, name='animate'),
+    url(r'^$', views.main_page, name='home'),
+    url(r'^stats$', views.stats, name='stats'),
 ]

@@ -1,0 +1,98 @@
+{% extends 'potholes_site/base.html' %}
+
+{% block body %}
+
+
+    <h2>Chicago Pothole Repair Tracker</h2>
+    <table>
+      <tr>
+        <td>
+          <h3>Filter Search:</h3>
+          <form method="POST">
+            {% csrf_token %}
+            <table>{{ model }}</table>
+            <p>* - required field</p>
+            <input type="submit" name="search_query" value="search" />
+          </form>
+          <p><a href="{% url 'animate' %}">View the animation map</a></p>
+          <p><a href="{% url 'stats' %}">Compare across Chicago neighborhoods</a></p>
+        </td>
+        <td>
+          <div id="map" style="background-color:white; width:500; height:500"></div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id='content'></div>
+        </td>
+        <td>
+          <div id='alert'></div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Script to display potholes on map -->
+    <!-- Modified from Google's API -->
+    <!-- https://developers.google.com/maps/documentation/javascript/examples/marker-simple -->
+    <script>
+      //Initializes map
+      function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 41.786, lng: -87.596},
+          zoom: 14
+        });
+        var infoWindow = new google.maps.InfoWindow({map: map});
+        var new_boundary = new google.maps.LatLngBounds();
+        //Creates markers for potholes on maps
+        {% for pothole in ph %}
+        var marker = new google.maps.Marker({
+          map:map,
+          position: {lat: {{pothole.lat}}, lng: {{pothole.lon}}},
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 5,
+            strokeWeight: 1,
+            {% if pothole.status == "Completed" or pothole.status == "Completed - Dup" %}
+            fillOpacity: 1,
+            fillColor: 'blue'
+            {% endif %}
+          }
+        });
+        //Extends the map so that the borders fit nicely
+        var position = new google.maps.LatLng({lat: {{pothole.lat}}, lng: {{pothole.lon}}}); 
+        new_boundary.extend(position);
+
+        var infobox = new google.maps.InfoWindow();
+        //Creates ability to click on pothole for more information
+        google.maps.event.addListener(marker, 'click', function() {
+          {% if pothole.status == 'Completed' %}
+          document.getElementById('content').innerHTML='<h2>Pothole near {{pothole.street}}<br>Service request #: {{pothole.service_num}}</h2><table><tr><td>Date reported:</td><td>{{pothole.creation_date}}</td></tr><tr><td>Date repaired:</td><td>{{pothole.completion_date}}</td></tr><tr><td>Repair status:</td><td>{{pothole.status}}</td></tr><tr><td>Current activity:</td><td>{{pothole.current_activity}}</td></tr><tr><td>Most recent action:</td><td>{{pothole.action}}</td></tr><tr><td colspan=2>{{pothole.response_time}}-day period between report and repair</td></tr><tr><td>urgency level: </td><td>{{pothole.urgency_level}}</td></tr><table>';
+          {% endif %}
+          //If the pothole is open, it opens a form to email the
+          // alderman in charge of the ward
+          {% if pothole.status == 'Open' %}
+          document.getElementById('content').innerHTML='<h2>Pothole near {{pothole.street}}<br>Service request #: {{pothole.service_num}}</h2><table><tr><td>Date reported:</td><td>{{pothole.creation_date}}</td></tr><tr><td>Repair status:</td><td>{{pothole.status}}</td></tr><tr><td>Current activity:</td><td>{{pothole.current_activity}}</td></tr><tr><td>Most recent action:</td><td>{{pothole.action}}</td></tr><tr><td colspan=2>{{pothole.response_time}} days since request filed </td></tr><tr><td>urgency level: </td><td>{{pothole.urgency_level}}</td></tr><table>';
+
+          document.getElementById('alert').innerHTML='<form method="GET">{{model1}}<br>Alert Alderman:<br><textarea name="message" cols="50" rows="10">Hi Alderman of Ward {{pothole.ward}}. I am concerned with the amount of potholes found in your ward. I am specifically concerned with the pothole on {{pothole.street}} It was reported on {{pothole.creation_date}} and has still not been fixed. Please attempt to solve this problem immediately.- A Concerned Citizen</textarea><br /><input type="submit" name="submit" value="Send message" /></form>';
+          {% endif %}
+          //If it is not open, it erases the form
+          {% if pothole.status != 'Open' %}
+          document.getElementById('alert').innerHTML='';
+          {% endif %}
+        });
+        {% endfor %}
+        map.fitBounds(new_boundary);
+      };
+
+
+    </script>
+    
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDaUF0YZWhLZqdIljnSFK4R78XbKAoXJ2U&callback=initMap">
+    </script>
+
+  </body>
+</html>
+
+
+{% endblock %}
