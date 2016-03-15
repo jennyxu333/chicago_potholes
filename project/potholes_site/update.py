@@ -157,6 +157,8 @@ def Status(pothole_list_objects):
         list of potholes with modified status
     '''
     broken_list =[]
+    #Modified from 
+    #http://stackoverflow.com/questions/403421/how-to-sort-a-list-of-objects-in-python-based-on-an-attribute-of-the-objects
     sorted_list = sorted(pothole_list_objects, key=lambda pothole: pothole.traffic_count)
     length = len(sorted_list)//31
     for i in range(31):
